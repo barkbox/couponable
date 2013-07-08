@@ -1,11 +1,11 @@
 if defined?(ActiveAdmin)
   ActiveAdmin.register Couponable::Coupon do
-    menu :parent => "Couponable", :label => "Coupon"
+    menu :parent => "Couponable", :label => "Coupons"
     
     filter :code, :label => 'Code'
 
     action_item do
-      link_to('Bulk Create Coupons', bulk_new_admin_coupons_path)
+      link_to('Bulk Create Coupons', bulk_new_admin_couponable_coupons_path)
     end
 
     collection_action :bulk_new, :method => :get do
@@ -75,16 +75,16 @@ if defined?(ActiveAdmin)
         row :discount_lifespan_billing_cycles
         row :max_redemptions
         row :coupon_redemptions do
-          coupon.coupon_redemptions.count
+          couponable_coupon.coupon_redemptions.count
         end
         row :expires_at
         row :created_at
         row :updated_at
       end
       panel("Coupon Redemptions") do
-        table_for(coupon.coupon_redemptions) do
+        table_for(couponable_coupon.coupon_redemptions) do
           column :id do |coupon_redemption|
-            link_to coupon_redemption.id, admin_coupon_redemption_path(coupon_redemption)
+            link_to coupon_redemption.id, admin_couponable_coupon_redemption_path(coupon_redemption)
           end
           column :coupon_redeemable
           column :user

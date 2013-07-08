@@ -12,7 +12,7 @@ module Couponable
       module Config
         def acts_as_coupon_redeemable
         
-          has_many :coupons, :class_name => 'Couponable::Coupon', :as => :couponable
+          has_many :coupon_redemptions, :class_name => 'Couponable::CouponRedemption'
 
           include Couponable::ActsAsCouponRedeemable::Base::InstanceMethods
         end
