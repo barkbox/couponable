@@ -12,7 +12,7 @@ module Couponable
       module Config
         def acts_as_couponable
         
-          has_many :coupons, :class_name => 'Couponable::Coupon', :as => :couponable
+          has_many :coupons, :class_name => 'Couponable::Coupon', :as => :couponable, :autosave => true
 
           include Couponable::ActsAsCouponable::Base::InstanceMethods
         end
