@@ -4,14 +4,14 @@ class Couponable::Coupon < ActiveRecord::Base
 
   belongs_to :couponable, :polymorphic => true
 
-  has_many :coupon_redemptions
+  has_many :coupon_redemptions, :after_add => :redemption_added
 
   def self.attributes_protected_by_default
     ["id"]
   end
   
   def is_valid?
-    (self.expires_at.blank? || self.expires_at >= DateTime.now) && (coupon_redemptions.count < max_redemptions)
+    (self.expires_at.blank? || self.expires_at >= DateTime.now) && (max_redemptions.nil? || coupon_redemptions.count < max_redemptions)
   end
 
   def discount_duration
@@ -37,6 +37,9 @@ class Couponable::Coupon < ActiveRecord::Base
     end
 
     { :add => [ hash ] }
+  end
+  
+  def redemption_added
   end
 
   class << self

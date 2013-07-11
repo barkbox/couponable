@@ -5,5 +5,6 @@ module Couponable
     belongs_to :coupon_redeemable, :polymorphic => true
     belongs_to :coupon
     belongs_to :user
+    
   end
 end
