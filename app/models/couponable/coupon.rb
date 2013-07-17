@@ -3,8 +3,7 @@ class Couponable::Coupon < ActiveRecord::Base
                   :expires_at, :max_redemptions, :name, :trial_duration, :trial_duration_unit
 
   belongs_to :couponable, :polymorphic => true
-
-  has_many :coupon_redemptions, :after_add => :redemption_added
+  has_many :coupon_redemptions
 
   def self.attributes_protected_by_default
     ["id"]

@@ -6,5 +6,12 @@ module Couponable
     belongs_to :coupon
     belongs_to :user
     
+    after_create :on_redeem
+    
+    def on_redeem
+      coupon.redemption_added(self)
+    end
+    
+    
   end
 end
