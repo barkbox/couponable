@@ -2,7 +2,8 @@ if defined?(ActiveAdmin)
   ActiveAdmin.register Couponable::Coupon do
     menu :parent => "Couponable", :label => "Coupons"
     
-    filter :code, :label => 'Code'
+    filter :code, :label => 'Code', :as => :string
+    filter :user_email, :label => 'Redeemer email', :as => :string
 
     action_item do
       link_to('Bulk Create Coupons', bulk_new_admin_couponable_coupons_path)
