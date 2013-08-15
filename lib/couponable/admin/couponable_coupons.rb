@@ -3,7 +3,6 @@ if defined?(ActiveAdmin)
     menu :parent => "Couponable", :label => "Coupons"
     
     filter :code, :label => 'Code', :as => :string
-    filter :user_email, :label => 'Redeemer email', :as => :string
 
     action_item do
       link_to('Bulk Create Coupons', bulk_new_admin_couponable_coupons_path)
