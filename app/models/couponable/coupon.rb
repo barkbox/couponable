@@ -9,8 +9,12 @@ class Couponable::Coupon < ActiveRecord::Base
     ["id"]
   end
   
+  def is_expired?
+    self.expires_at.present? && self.expires_at < DateTime.now
+  end
+
   def is_valid?
-    (self.expires_at.blank? || self.expires_at >= DateTime.now) && (max_redemptions.nil? || coupon_redemptions.count < max_redemptions)
+    !is_expired? && (max_redemptions.nil? || coupon_redemptions.count < max_redemptions)
   end
 
   def discount_duration
