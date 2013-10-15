@@ -1,6 +1,7 @@
 class Couponable::Coupon < ActiveRecord::Base
   attr_accessible :code, :discount_amount_cents, :discount_lifespan, :discount_lifespan_billing_cycles,
-                  :expires_at, :max_redemptions, :name, :trial_duration, :trial_duration_unit, :type
+                  :expires_at, :max_redemptions, :name, :trial_duration, :trial_duration_unit, :type,
+                  :valid_durations
 
   belongs_to :couponable, :polymorphic => true
   has_many :coupon_redemptions
@@ -15,6 +16,14 @@ class Couponable::Coupon < ActiveRecord::Base
 
   def is_redeemed?
     max_redemptions.present? && coupon_redemptions.count >= max_redemptions
+  end
+  
+  def applies_to_plan_duration? duration
+    Rails.logger.debug "VALID DURATIONS: #{self.valid_durations.inspect}"
+    return true if duration.nil? || self.valid_durations.nil?
+    durations = self.valid_durations.split(',').map{|d| d.strip.to_i }
+    return true if self.valid_durations.length == 0
+    durations.include?(duration)
   end
 
   def is_valid?
