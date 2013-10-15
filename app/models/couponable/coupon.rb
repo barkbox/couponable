@@ -1,7 +1,7 @@
 class Couponable::Coupon < ActiveRecord::Base
   attr_accessible :code, :discount_amount_cents, :discount_lifespan, :discount_lifespan_billing_cycles,
                   :expires_at, :max_redemptions, :name, :trial_duration, :trial_duration_unit, :type,
-                  :valid_durations
+                  :valid_duration
 
   belongs_to :couponable, :polymorphic => true
   has_many :coupon_redemptions
@@ -67,14 +67,20 @@ class Couponable::Coupon < ActiveRecord::Base
     end
     
     def bulk_create count, options
-      code_length = options.delete(:code_length).to_i || 16
-      Couponable::Coupon.transaction do
-        count.times do
+      code_length = options[:code_length].to_i || 16
+      count.times do
+        attempts = 0
+        until attempts >= 25
           options[:code] = Couponable::Coupon.random_code(options[:prefix], code_length)
+          break if Couponable::Coupon.where(:code => options[:code]).length == 0
+          attempts += 1
+        end
+        begin
           coupon = Couponable::Coupon.create(options)
+        rescue => e
+          Rails.logger.error "Unable to create coupon code #{code_length} characters long with options #{options.inspect}"
         end
       end
-      
     end
   end
 
