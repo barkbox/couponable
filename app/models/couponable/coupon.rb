@@ -5,7 +5,13 @@ class Couponable::Coupon < ActiveRecord::Base
 
   belongs_to :couponable, :polymorphic => true
   has_many :coupon_redemptions
-
+  
+  before_save :upcase_code
+  
+  def upcase_code
+    self.code = self.code.upcase if self.code
+  end
+  
   def self.attributes_protected_by_default
     ["id"]
   end
@@ -19,7 +25,6 @@ class Couponable::Coupon < ActiveRecord::Base
   end
   
   def applies_to_plan_duration? duration
-    Rails.logger.debug "VALID DURATIONS: #{self.valid_durations.inspect}"
     return true if duration.nil? || self.valid_durations.nil?
     durations = self.valid_durations.split(',').map{|d| d.strip.to_i }
     return true if self.valid_durations.length == 0
@@ -63,7 +68,7 @@ class Couponable::Coupon < ActiveRecord::Base
 
     def random_code prefix="", length=16
       charset = ('A'..'Z').to_a + (0..9).to_a
-      prefix + (0...(length-prefix.length)).collect{ charset[Random.rand(charset.length)] }.join
+      prefix + (0...(length-prefix.length)).collect{ charset[Random.rand(charset.length)] }.join.upcase
     end
     
     def bulk_create count, options
