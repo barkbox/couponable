@@ -61,8 +61,8 @@ class Couponable::Coupon < ActiveRecord::Base
   end
   
   def redemption_added
+    self.update_attribute(:expires_at, Time.now) unless is_valid?
   end
-
 
   class << self
 
