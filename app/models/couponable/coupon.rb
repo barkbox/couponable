@@ -60,7 +60,7 @@ class Couponable::Coupon < ActiveRecord::Base
     { :add => [ hash ] }
   end
   
-  def redemption_added
+  def redemption_added redemption=nil
     self.update_attribute(:expires_at, Time.now) unless is_valid?
   end
 
