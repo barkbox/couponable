@@ -1,7 +1,8 @@
 class Couponable::Coupon < ActiveRecord::Base
   attr_accessible :code, :discount_amount_cents, :discount_lifespan, :discount_lifespan_billing_cycles,
                   :expires_at, :max_redemptions, :name, :trial_duration, :trial_duration_unit, :type,
-                  :valid_durations, :discount_type, :discount_percent
+                  :valid_durations, :discount_type, :discount_percent,
+                  :purchase_restriction
 
   belongs_to :couponable, :polymorphic => true
   has_many :coupon_redemptions
@@ -24,6 +25,12 @@ class Couponable::Coupon < ActiveRecord::Base
     max_redemptions.present? && coupon_redemptions.count >= max_redemptions
   end
   
+  def valid_for? purchase_type
+    return false if purchase_type.nil?
+    return true if self.purchase_restriction.nil?
+    self.purchase_restriction.include? purchase_type.to_s
+  end
+
   def applies_to_plan_duration? duration
     return true if duration.nil? || self.valid_durations.nil?
     durations = self.valid_durations.split(',').map{|d| d.strip.to_i }
