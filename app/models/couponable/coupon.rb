@@ -65,7 +65,7 @@ class Couponable::Coupon < ActiveRecord::Base
     self.update_attribute(:expires_at, Time.now) unless is_valid?
   end
 
-  def couponable_is? restriction
+  def restriction_allows? restriction
     true
   end
 
