@@ -1,7 +1,8 @@
 class Couponable::Coupon < ActiveRecord::Base
   attr_accessible :code, :discount_amount_cents, :discount_lifespan, :discount_lifespan_billing_cycles,
                   :expires_at, :max_redemptions, :name, :trial_duration, :trial_duration_unit, :type,
-                  :valid_durations, :discount_type, :discount_percent
+                  :valid_durations, :discount_type, :discount_percent, 
+                  :couponable_restriction
 
   belongs_to :couponable, :polymorphic => true
   has_many :coupon_redemptions
@@ -62,6 +63,10 @@ class Couponable::Coupon < ActiveRecord::Base
   
   def redemption_added redemption=nil
     self.update_attribute(:expires_at, Time.now) unless is_valid?
+  end
+
+  def restricts? restricted=nil
+    false
   end
 
   class << self
