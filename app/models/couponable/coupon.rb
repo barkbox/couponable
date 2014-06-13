@@ -1,7 +1,7 @@
 class Couponable::Coupon < ActiveRecord::Base
-  attr_accessible :code, :discount_amount_cents, :discount_lifespan, :discount_lifespan_billing_cycles,
+  attr_accessible :code, :discount_lifespan, :discount_lifespan_billing_cycles,
                   :expires_at, :max_redemptions, :name, :trial_duration, :trial_duration_unit, :type,
-                  :valid_durations, :discount_type, :discount_percent, 
+                  :valid_duration, :discount_type, :discount_value,
                   :couponable_restriction
 
   belongs_to :couponable, :polymorphic => true
@@ -26,10 +26,8 @@ class Couponable::Coupon < ActiveRecord::Base
   end
   
   def applies_to_plan_duration? duration
-    return true if duration.nil? || self.valid_durations.nil?
-    durations = self.valid_durations.split(',').map{|d| d.strip.to_i }
-    return true if self.valid_durations.length == 0
-    durations.include?(duration)
+    return true if duration.blank? || self.valid_duration.blank?
+    self.valid_duration == duration.to_i
   end
 
   def is_valid?
@@ -50,7 +48,7 @@ class Couponable::Coupon < ActiveRecord::Base
   def discount_hash
     hash = {
       :inherited_from_id => "DISCOUNT",
-      :amount => BigDecimal.new("#{self.discount_amount_cents/100}"),
+      :amount => BigDecimal.new("#{self.discount_value/100}"),
     }
     if self.discount_lifespan == "forever"
       hash[:never_expires] = true
