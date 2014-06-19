@@ -15,9 +15,6 @@ class PopulateDiscountValue < ActiveRecord::Migration
     ]
     
     ActiveRecord::Base.connection.execute(dollars_query)
-
-    remove_column :couponable_coupons, :discount_amount_cents
-    remove_column :couponable_coupons, :discount_percent
   end
 
   def down

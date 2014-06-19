@@ -27,8 +27,6 @@ class CreateRowsForValidDuration < ActiveRecord::Migration
 
     Couponable::Coupon.where('valid_durations LIKE ?', '%,%').destroy_all
 
-    remove_column :couponable_coupons, :valid_durations
-
     # clean up data
     query = %Q[
       UPDATE couponable_coupons
