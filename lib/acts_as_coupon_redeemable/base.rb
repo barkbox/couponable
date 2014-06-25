@@ -12,7 +12,8 @@ module Couponable
       module Config
         def acts_as_coupon_redeemable
         
-          has_many :coupon_redemptions, :class_name => 'Couponable::CouponRedemption'
+          has_many :coupon_redemptions, :class_name => 'Couponable::CouponRedemption', foreign_key: :coupon_redeemable_id
+          has_many :couponable_coupons, through: :coupon_redemptions, source: :coupon
 
           include Couponable::ActsAsCouponRedeemable::Base::InstanceMethods
         end
