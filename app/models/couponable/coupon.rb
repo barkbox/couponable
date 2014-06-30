@@ -45,6 +45,7 @@ class Couponable::Coupon < ActiveRecord::Base
     end
   end
 
+  #WARNING: deprecated
   def discount_hash
     hash = {
       :inherited_from_id => "DISCOUNT",
