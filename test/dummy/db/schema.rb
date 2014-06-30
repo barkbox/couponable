@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130702195128) do
+ActiveRecord::Schema.define(:version => 20140613185957) do
 
   create_table "couponable_coupon_redemptions", :force => true do |t|
     t.integer  "coupon_id"
@@ -40,10 +40,13 @@ ActiveRecord::Schema.define(:version => 20130702195128) do
     t.string   "couponable_type"
     t.integer  "couponable_id"
     t.string   "type"
-    t.datetime "created_at",                       :null => false
-    t.datetime "updated_at",                       :null => false
+    t.datetime "created_at",                                              :null => false
+    t.datetime "updated_at",                                              :null => false
+    t.string   "valid_durations"
+    t.string   "discount_type",                    :default => "dollars", :null => false
+    t.integer  "discount_percent"
+    t.string   "couponable_restriction"
+    t.integer  "valid_duration"
   end
-
-  add_index "couponable_coupons", ["code"], :name => "index_couponable_coupons_on_code", :unique => true
 
 end
