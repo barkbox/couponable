@@ -85,7 +85,9 @@ class Couponable::Coupon < ActiveRecord::Base
           attempts += 1
         end
         begin
-          coupon = Couponable::Coupon.create(options)
+          coupon = Couponable::Coupon.new(options)
+          coupon.couponable = options[:couponable] if options[:couponable].present?
+          coupon.save
         rescue => e
           Rails.logger.error "Unable to create coupon code #{code_length} characters long with options #{options.inspect}"
         end
