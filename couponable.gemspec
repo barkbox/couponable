@@ -9,9 +9,9 @@ Gem::Specification.new do |s|
   s.version     = Couponable::VERSION
   s.authors     = ["Cris Kim"]
   s.email       = ["cris@criskim.com"]
-  s.homepage    = "TODO"
-  s.summary     = "TODO: Summary of Couponable."
-  s.description = "TODO: Description of Couponable."
+  s.homepage    = "http://bark.co"
+  s.summary     = "Summary of Couponable."
+  s.description = "Description of Couponable."
 
   s.files = Dir["{app,config,db,lib}/**/*"] + ["MIT-LICENSE", "Rakefile", "README.rdoc"]
   s.test_files = Dir["test/**/*"]
