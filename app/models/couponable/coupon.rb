@@ -1,22 +1,22 @@
 class Couponable::Coupon < ActiveRecord::Base
-  attr_accessible :code, :discount_lifespan, :discount_lifespan_billing_cycles,
-                  :expires_at, :max_redemptions, :name, :trial_duration, :trial_duration_unit, :type,
-                  :valid_duration, :discount_type, :discount_value,
-                  :couponable_restriction, :redeemable_on
+  # attr_accessible :code, :discount_lifespan, :discount_lifespan_billing_cycles,
+  #                 :expires_at, :max_redemptions, :name, :trial_duration, :trial_duration_unit, :type,
+  #                 :valid_duration, :discount_type, :discount_value,
+  #                 :couponable_restriction, :redeemable_on
 
   belongs_to :couponable, :polymorphic => true
   has_many :coupon_redemptions
-  
+
   before_save :upcase_code
-  
+
   def upcase_code
     self.code = self.code.upcase if self.code
   end
-  
+
   def self.attributes_protected_by_default
     ["id"]
   end
-  
+
   def is_expired?
     self.expires_at.present? && self.expires_at < DateTime.now
   end
@@ -24,7 +24,7 @@ class Couponable::Coupon < ActiveRecord::Base
   def is_redeemed?
     max_redemptions.present? && coupon_redemptions.count >= max_redemptions
   end
-  
+
   def applies_to_plan_duration? duration
     return true if duration.blank? || self.valid_duration.blank?
     self.valid_duration == duration.to_i
@@ -59,7 +59,7 @@ class Couponable::Coupon < ActiveRecord::Base
 
     { :add => [ hash ] }
   end
-  
+
   def redemption_added redemption=nil
     self.update_attribute(:expires_at, Time.now) unless is_valid?
   end
@@ -74,7 +74,7 @@ class Couponable::Coupon < ActiveRecord::Base
       charset = ('A'..'Z').to_a + (0..9).to_a
       prefix + (0...(length-prefix.length)).collect{ charset[Random.rand(charset.length)] }.join.upcase
     end
-    
+
     def bulk_create count, options
       code_length = options[:code_length].to_i || 16
       count.times do
