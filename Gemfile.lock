@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    couponable (2.0.0)
+    couponable (2.1.0)
       rails (>= 5.0.0.beta3, < 5.1)
 
 GEM
