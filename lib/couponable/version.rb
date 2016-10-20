@@ -1,3 +1,3 @@
 module Couponable
-  VERSION = "2.2.0"
+  VERSION = "1.3.0"
 end
