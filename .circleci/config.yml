@@ -145,7 +145,7 @@ jobs:
       - run:
           name: Database Setup
           command: |
-            cd test/dummy && bundle exec rake db:schema:load
+            cd test/dummy && bundle exec rake db:setup
       - run: |
           mkdir -p ~/couponable-build/tmp
           bundle exec rake test \
