@@ -145,7 +145,7 @@ jobs:
       - run:
           name: Database Setup
           command: |
-            cd test/dummy && bundle exec rake db:setup RAILS_ENV=test
+            bundle exec rake db:setup RAILS_ENV=test
       - run: |
           mkdir -p ~/couponable-build/tmp
           bundle exec ruby -Itest $(circleci tests glob "test/**/*_test.rb" | circleci tests split --split-by=timings)\
