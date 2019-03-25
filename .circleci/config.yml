@@ -164,4 +164,6 @@ workflows:
   build-and-test:
     jobs:
       - checkout_code
-      - rspec_test
+      - rspec_test:
+        requires:
+          - checkout_code
