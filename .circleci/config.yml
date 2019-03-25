@@ -165,5 +165,5 @@ workflows:
     jobs:
       - checkout_code
       - rspec_test:
-        requires:
-          - checkout_code
+          requires:
+            - checkout_code
