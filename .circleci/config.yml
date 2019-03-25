@@ -148,10 +148,10 @@ jobs:
             cd test/dummy && bundle exec rake db:setup
       - run: |
           mkdir -p ~/couponable-build/tmp
-          bundle exec rake test \
+          bundle exec ruby $(circleci tests glob "test/**/*_test.rb" | circleci tests split --split-by=timings)\
             --junit \
             --junit-filename=test_results/test.xml
-            $(circleci tests glob "test/**/*_test.rb" | circleci tests split --split-by=timings)
+
       - store_test_results:
           path: test_results
 
