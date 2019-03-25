@@ -66,9 +66,13 @@ GEM
     mini_mime (1.0.1)
     mini_portile2 (2.4.0)
     minitest (5.11.3)
+    minitest-junit (0.2.0)
+      builder (~> 3.2)
+      minitest (~> 5.0)
     nio4r (2.3.1)
     nokogiri (1.10.2)
       mini_portile2 (~> 2.4.0)
+    pg (1.1.4)
     rack (2.0.6)
     rack-test (0.6.3)
       rack (>= 1.0)
@@ -118,6 +122,8 @@ PLATFORMS
 DEPENDENCIES
   couponable!
   jquery-rails
+  minitest-junit
+  pg
   sqlite3
 
 BUNDLED WITH

@@ -115,7 +115,7 @@ jobs:
           paths:
             - .
 
-  rspec_test:
+  test:
     <<: *defaults
     parallelism: 1
 # total parallelism should be 10 for rspec_test and flaky_rspec_test, if one is taking signifigantly longer than the other these should be adjusted
@@ -138,23 +138,20 @@ jobs:
             sudo apt-get install postgresql-client-9.5 -y
       - run:
           name: Swap Database Config
-          command: cp config/database.yml.ci config/database.yml
+          command: cp test/dummy/config/database.yml.ci test/dummy/config/database.yml
       - run:
           name: Wait for DB
           command: dockerize -wait tcp://localhost:5432 -timeout 1m
       - run:
           name: Database Setup
           command: |
-            bundle exec rake db:structure:load
+            cd test/dummy && bundle exec rake db:schema:load
       - run: |
           mkdir -p ~/couponable-build/tmp
-          bundle exec rspec \
-            --color \
-            --format documentation \
-            --profile \
-            --format RspecJunitFormatter \
-            --out test_results/rspec.xml \
-            $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
+          bundle exec rake test \
+            --junit \
+            --junit-filename=test_results/test.xml
+            $(circleci tests glob "test/**/*_test.rb" | circleci tests split --split-by=timings)
       - store_test_results:
           path: test_results
 
@@ -169,6 +166,6 @@ workflows:
   build-and-test:
     jobs:
       - checkout_code
-      - rspec_test:
+      - test:
           requires:
             - checkout_code
