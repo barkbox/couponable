@@ -148,6 +148,7 @@ jobs:
             bundle exec rails db:create db:migrate RAILS_ENV=test
       - run: |
           mkdir -p ~/couponable-build/tmp
+          mkdir -p ~/couponable-build/test_results
           bundle exec ruby -Itest $(circleci tests glob "test/**/*_test.rb" | circleci tests split --split-by=timings)\
             --junit \
             --junit-filename=test_results/test.xml
