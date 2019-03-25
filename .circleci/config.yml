@@ -1,0 +1,159 @@
+version: 2.1
+
+defaults: &defaults
+  working_directory: ~/couponable-build
+  docker:
+    - image: circleci/ruby:2.4-node-browsers
+      environment:
+        BUNDLE_JOBS: 3
+        BUNDLE_RETRY: 3
+        BUNDLE_PATH: vendor/bundle
+        PGHOST: 127.0.0.1
+        PGUSER: ubuntu
+        RAILS_ENV: test
+    - image: circleci/postgres:9.6-alpine
+      environment:
+        POSTGRES_USER: ubuntu
+        POSTGRES_DB: barkbox_test
+
+aliases:
+  # Shallow Git Clone
+  # https://discuss.circleci.com/t/shallow-clone-for-circleci-2-0-builds/20200
+  - &checkout-shallow
+    name: Checkout
+    command: |
+      #!/bin/sh
+      set -e
+
+      # Workaround old docker images with incorrect $HOME
+      # check https://github.com/docker/docker/issues/2968 for details
+      if [ "${HOME}" = "/" ]
+      then
+        export HOME=$(getent passwd $(id -un) | cut -d: -f6)
+      fi
+
+      mkdir -p ~/.ssh
+
+      echo 'github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
+      bitbucket.org ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAubiN81eDcafrgMeLzaFPsw2kNvEcqTKl/VqLat/MaB33pZy0y3rJZtnqwR2qOOvbwKZYKiEO1O6VqNEBxKvJJelCq0dTXWT5pbO2gDXC6h6QDXCaHo6pOHGPUy+YBaGQRGuSusMEASYiWunYN0vCAI8QaXnWMXNMdFP3jHAJH0eDsoiGnLPBlBp4TNm6rYI74nMzgz3B9IikW4WVK+dc8KZJZWYjAuORU3jc1c/NPskD2ASinf8v3xnfXeukU0sJ5N6m5E8VLjObPEO+mN2t/FZTMZLiFqPWc/ALSqnMnnhwrNi2rbfg/rd/IpL8Le3pSBne8+seeFVBoGqzHM9yXw==
+      ' >> ~/.ssh/known_hosts
+
+      (umask 077; touch ~/.ssh/id_rsa)
+      chmod 0600 ~/.ssh/id_rsa
+      (cat \<<EOF > ~/.ssh/id_rsa
+      $CHECKOUT_KEY
+      EOF
+      )
+
+      # use git+ssh instead of https
+      git config --global url."ssh://git@github.com".insteadOf "https://github.com" || true
+
+      if [ -e ~/couponable-build/.git ]
+      then
+          cd ~/couponable-build
+          git remote set-url origin "$CIRCLE_REPOSITORY_URL" || true
+      else
+          mkdir -p ~/couponable-build
+          cd ~/couponable-build
+          git clone --depth=1 "$CIRCLE_REPOSITORY_URL" .
+       fi
+
+       if [ -n "$CIRCLE_TAG" ]
+       then
+         git fetch --depth=10 --force origin "refs/tags/${CIRCLE_TAG}"
+       elif [[ "$CIRCLE_BRANCH" =~ ^pull\/* ]]
+       then
+       # For PR from Fork
+         git fetch --depth=10 --force origin "$CIRCLE_BRANCH/head:remotes/origin/$CIRCLE_BRANCH"
+       else
+         git fetch --depth=10 --force origin "$CIRCLE_BRANCH:remotes/origin/$CIRCLE_BRANCH"
+       fi
+
+      if [ -n "$CIRCLE_TAG" ]
+      then
+          git reset --hard "$CIRCLE_SHA1"
+          git checkout -q "$CIRCLE_TAG"
+      elif [ -n "$CIRCLE_BRANCH" ]
+      then
+          git reset --hard "$CIRCLE_SHA1"
+          git checkout -q -B "$CIRCLE_BRANCH"
+      fi
+
+      git reset --hard "$CIRCLE_SHA1"
+
+jobs:
+  checkout_code:
+    <<: *defaults
+    steps:
+      - run: *checkout-shallow
+      - add_ssh_keys
+      - attach_workspace:
+          at: ~/couponable-build
+      - run:
+          name: Which bundler?
+          command: bundle -v
+      - restore_cache:
+          keys:
+            - v1-couponable-v2.4.4-{{ checksum "Gemfile.lock" }}
+            - v1-couponable-v2.4.4-
+      - run:
+          name: Bundle Install
+          command: bundle check --path vendor/bundle || bundle install --path vendor/bundle
+      - save_cache:
+          key: v1-couponable-v2.4.4-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+      - persist_to_workspace:
+          root: ~/couponable-build
+          paths:
+            - .
+
+  rspec_test:
+    <<: *defaults
+    parallelism: 1
+# total parallelism should be 10 for rspec_test and flaky_rspec_test, if one is taking signifigantly longer than the other these should be adjusted
+    steps:
+      - attach_workspace:
+          at: ~/couponable-build
+      - run: bundle --path vendor/bundle
+      - run:
+          name: Install psql
+          command: |
+            wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+            sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" >> /etc/apt/sources.list.d/postgresql.list'
+            sudo apt update -y
+            sudo apt-get install postgresql-client-9.5 -y
+      - run:
+          name: Swap Database Config
+          command: cp config/database.yml.ci config/database.yml
+      - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+      - run:
+          name: Database Setup
+          command: |
+            bundle exec rake db:structure:load
+      - run: |
+          mkdir -p ~/couponable-build/tmp
+          bundle exec rspec \
+            --color \
+            --format documentation \
+            --profile \
+            --format RspecJunitFormatter \
+            --out test_results/rspec.xml \
+            $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
+      - store_test_results:
+          path: test_results
+
+experimental:
+  notify:
+    branches:
+      only:
+        - master
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - checkout_code
+      - rspec_test
