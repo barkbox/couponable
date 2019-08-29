@@ -1,9 +1,4 @@
 class Couponable::Coupon < ActiveRecord::Base
-  attr_accessible :code, :discount_lifespan, :discount_lifespan_billing_cycles,
-                  :expires_at, :max_redemptions, :name, :trial_duration, :trial_duration_unit, :type,
-                  :valid_duration, :discount_type, :discount_value,
-                  :couponable_restriction, :redeemable_on
-
   belongs_to :couponable, :polymorphic => true
   has_many :coupon_redemptions
 
